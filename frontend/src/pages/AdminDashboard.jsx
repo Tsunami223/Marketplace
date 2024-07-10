@@ -1,4 +1,3 @@
-// AdminDashboard.js
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
@@ -38,7 +37,7 @@ const AdminDashboard = () => {
 
   const handleAddProduct = async () => {
     try {
-      await axios.post('http://localhost:5000/api/products', formData);
+      await axios.post('http://localhost:5000/api/products', formData); 
       fetchProducts();
       setShowModal(false);
     } catch (error) {
@@ -66,7 +65,7 @@ const AdminDashboard = () => {
   const toggleModal = () => setShowModal(!showModal);
 
   return (
-    <Container className="mt-5">
+    <Container className="mt-5 bg-white rounded-4 p-4 mb-2">
       <h2>Admin Dashboard</h2>
 
       <Button variant="primary" onClick={toggleModal} className="mb-3">
@@ -118,6 +117,7 @@ const AdminDashboard = () => {
                 value={formData.imageUrl}
                 onChange={handleChange}
               />
+
             </Form.Group>
           </Form>
         </Modal.Body>

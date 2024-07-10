@@ -1,4 +1,4 @@
-import React from 'react';
+import React , { useState, useEffect } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -9,13 +9,28 @@ import Login from './pages/Login';
 import Contact from './pages/Contact';
 import AdminDashboard from './pages/AdminDashboard';
 import RegistrationForm from './pages/RegistrationForm';
+import Spinner from './components/Spinner';
 
 
 const App =() => {
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
 
   return (
     <BrowserRouter>
-    <Navbar />
+        <Navbar/>
+      {loading ? (
+        <Spinner />
+      ) : (
+        <>
     <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
@@ -27,9 +42,11 @@ const App =() => {
         <Route path="/product/:id" element={<Product />}>
         </Route>
     </Routes>
-</BrowserRouter>
-  )
-}
+    </>
+      )}
+    </BrowserRouter>
+  );
+};
 
 export default App;
 

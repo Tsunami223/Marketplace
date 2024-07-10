@@ -10,6 +10,7 @@ const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     try { const login = await axios.post('http://localhost:5000/login', {
+      
       email,
       password,
     })

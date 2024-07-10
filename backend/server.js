@@ -8,13 +8,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 
+
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 const upload = multer({ dest: 'uploads/' });
 
 const productRoutes = require('./routes/products');
-const multerUploads = require('./config/multerConfig'); 
+const multerUploads = require('./config/cloudinaryConfig'); 
 
 app.use(cors());
 app.use(express.json());
@@ -106,11 +107,7 @@ const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
 
-// Route per la registrazione degli utenti
 
-// Route per il login degli utenti
-
-// Route protetta per ottenere i dati dell'utente autenticato
 app.get('/auth/user', auth, async (req, res) => {
   try {
     // Ottieni l'utente dal database (escludi il campo password)

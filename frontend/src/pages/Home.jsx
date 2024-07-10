@@ -26,7 +26,7 @@ const Home = () => {
       // Componente Home con carousel di immagini e bottone per navigare al negozio
       <div className="home">
         <section className="hero">
-          <div className="hero-content d-flex flex-column align-items-center bg-white rounded-4 mt-5 m-auto w-50 p-4">
+          <div className="hero-content d-flex flex-column align-items-center bg-white rounded-4 mt-5 m-auto w-50 p-5">
           <img  src="/logo.png" alt="Logo del sito" className="logo rounded-5 h-25 w-25" />
             <h1>Benvenuto nel nostro negozio di moda!</h1>
             <p>Scopri le ultime tendenze e acquista articoli di moda di alta qualità.</p>
