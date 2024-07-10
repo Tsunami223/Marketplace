@@ -1,33 +1,38 @@
 import axios from 'axios';
 import React, { useState } from 'react';
-import { Container, Form, Button } from 'react-bootstrap';
+import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [error, setError] = useState('');
   const handleLogin = async (e) => {
     e.preventDefault();
-    try { const login = await axios.post('http://localhost:5000/login', {
+    try { const response = await axios.post('http://localhost:5000/login', {
       
       email,
       password,
-    })
-    if (login.data) {
-      localStorage.setItem('token', login.data)
-      navigate('/admin/dashboard')
-    }    
-    } catch (error) {
-      setEmail('');
-      setPassword('');
-      
+    });
+    const { data } = response
+ 
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      navigate('/admin/dashboard');
+    } else {
+      setError('Errore durante il login');
     }
-  };
+  } catch (error) {
+    console.error('Errore durante il login:', error);
+    setError('Credenziali non valide');
+  }
+};
 
   return (
     <Container className="mt-5 bg-white rounded-4 p-4 w-25">
       <h2>Login</h2>
+      {error && <Alert variant="danger">{error}</Alert>}
       <Form onSubmit={handleLogin}>
         <Form.Group controlId="formMail">
           <Form.Label>Email</Form.Label>
