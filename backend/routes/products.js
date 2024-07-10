@@ -1,6 +1,7 @@
 const express = require('express');
 const Product = require('../models/product');
 const router = express.Router();
+const verifyToken = require('../middleware/auth');
 
 // Ottieni tutti i prodotti
 router.get('/', async (req, res) => {
@@ -14,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Aggiungi un nuovo prodotto
-router.post('/', async (req, res) => {
+router.post('/', verifyToken, async (req, res) => {
   try {
     const { name, description, category, price, imageUrl, quantity } = req.body;
     const newProduct = new Product({ name, description, category, price, imageUrl, quantity });
@@ -27,7 +28,7 @@ router.post('/', async (req, res) => {
 });
 
 // Aggiorna un prodotto esistente
-router.put('/:id', async (req, res) => {
+router.put('/:id', verifyToken , async (req, res) => {
   const { name, description, category, price, imageUrl, quantity } = req.body;
   try {
     const updatedProduct = await Product.findByIdAndUpdate(
@@ -46,7 +47,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Rimuove un prodotto esistente
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', verifyToken, async (req, res) => {
   try {
     const deletedProduct = await Product.findByIdAndDelete(req.params.id);
     if (!deletedProduct) {

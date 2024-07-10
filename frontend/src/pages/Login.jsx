@@ -1,31 +1,39 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
-  const handleLogin = (e) => {
+const navigate = useNavigate();
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Implementa la logica di autenticazione qui (es. chiamata API, verifica credenziali)
-    console.log('Username:', username);
-    console.log('Password:', password);
-    // Resetta i campi dopo il login
-    setUsername('');
-    setPassword('');
+    try { const login = await axios.post('http://localhost:5000/login', {
+      email,
+      password,
+    })
+    if (login.data) {
+      localStorage.setItem('token', login.data)
+      navigate('/admin/dashboard')
+    }    
+    } catch (error) {
+      setEmail('');
+      setPassword('');
+      
+    }
   };
 
   return (
     <Container className="mt-5 bg-white rounded-4 p-4 w-25">
       <h2>Login</h2>
       <Form onSubmit={handleLogin}>
-        <Form.Group controlId="formUsername">
-          <Form.Label>Username</Form.Label>
+        <Form.Group controlId="formMail">
+          <Form.Label>Email</Form.Label>
           <Form.Control
             type="text"
-            placeholder="Enter username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Enter email"
+            onChange={(e) => setEmail(e.target.value)}
           />
         </Form.Group>
 
@@ -34,7 +42,6 @@ const Login = () => {
           <Form.Control
             type="password"
             placeholder="Enter password"
-            value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </Form.Group>

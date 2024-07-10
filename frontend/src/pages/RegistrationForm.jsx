@@ -29,7 +29,6 @@ const RegistrationForm = () => {
         password: '',
       });
 
-      window.history.push('/login');
     } catch (error) {
       console.error('Registration Error:', error);
     }
@@ -75,6 +74,7 @@ const RegistrationForm = () => {
         <Button className='mt-3' variant="primary" type="submit">
           Register
         </Button>
+        
       </Form>
     </Container>
   );

@@ -2,8 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Table, Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const token = localStorage.getItem('token');
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -12,14 +15,21 @@ const AdminDashboard = () => {
     price: '',
     imageUrl: '',
   });
-
+  
   useEffect(() => {
-    fetchProducts();
+    if (token){
+      fetchProducts();
+    } else navigate('/login'); 
   }, []);
+    
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/products');
+      const response = await axios.get('http://localhost:5000/api/products', {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
       setProducts(response.data);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -28,7 +38,7 @@ const AdminDashboard = () => {
 
   const handleAddProduct = async () => {
     try {
-      await axios.post('http://localhost:5000/products', formData);
+      await axios.post('http://localhost:5000/api/products', formData);
       fetchProducts();
       setShowModal(false);
     } catch (error) {
@@ -38,7 +48,7 @@ const AdminDashboard = () => {
 
   const handleDeleteProduct = async (productId) => {
     try {
-      await axios.delete(`http://localhost:5000/products/${productId}`);
+      await axios.delete(`http://localhost:5000/api/products/${productId}`);
       fetchProducts();
     } catch (error) {
       console.error('Error deleting product:', error);
