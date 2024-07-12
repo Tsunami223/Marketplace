@@ -3,6 +3,7 @@ import { Container, Table, Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
@@ -12,16 +13,19 @@ const AdminDashboard = () => {
     name: '',
     description: '',
     price: '',
+    category: '',
     imageUrl: '',
-  });
-  
-  useEffect(() => {
-    if (token){
-      fetchProducts();
-    } else navigate('/login'); 
-  }, []);
-    
 
+  });
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    } else {
+      fetchProducts();
+    }
+  }, [token, navigate]);
+  
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/products', {
@@ -37,7 +41,11 @@ const AdminDashboard = () => {
 
   const handleAddProduct = async () => {
     try {
-      await axios.post('http://localhost:5000/api/products', formData); 
+      await axios.post('http://localhost:5000/api/products', formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      }); 
       fetchProducts();
       setShowModal(false);
     } catch (error) {
@@ -46,11 +54,19 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/products/${productId}`);
-      fetchProducts();
-    } catch (error) {
-      console.error('Error deleting product:', error);
+    const userConfirmed = window.confirm("Sei sicuro di voler eliminare questo prodotto?");
+
+    if (userConfirmed) {
+      try {
+        await axios.delete(`http://localhost:5000/api/products/${productId}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+        fetchProducts();
+      } catch (error) {
+        console.error('Error deleting product:', error);
+      }
     }
   };
 
@@ -108,13 +124,21 @@ const AdminDashboard = () => {
                 onChange={handleChange}
               />
             </Form.Group>
-
-            <Form.Group controlId="formImageUrl">
-              <Form.Label>Image URL</Form.Label>
+            <Form.Group controlId="formPrice">
+              <Form.Label>Category</Form.Label>
               <Form.Control
                 type="text"
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group controlId="formImageUrl">
+              <Form.Label>Image</Form.Label>
+              <Form.Control
+                type="file"
                 name="imageUrl"
-                value={formData.imageUrl}
                 onChange={handleChange}
               />
 
@@ -130,13 +154,14 @@ const AdminDashboard = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-
+       
       <Table striped bordered hover>
         <thead>
           <tr>
             <th>Name</th>
             <th>Description</th>
             <th>Price</th>
+            <th>Category</th>
             <th>Actions</th>
           </tr>
         </thead>
@@ -146,11 +171,15 @@ const AdminDashboard = () => {
               <td>{product.name}</td>
               <td>{product.description}</td>
               <td>{product.price}</td>
+              <td>{product.category}</td>
               <td>
-                <Button variant="danger" onClick={() => handleDeleteProduct(product._id)}>
+                <Button className='m-1' variant="danger" onClick={() => handleDeleteProduct(product._id)}>
                   Delete
                 </Button>
-              </td>
+                <Button className='m-1' variant="primary" onClick={() => handleChange(product._id)}>
+                  Edit
+                </Button>             
+                 </td>
             </tr>
           ))}
         </tbody>

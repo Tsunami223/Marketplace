@@ -1,33 +1,43 @@
 import React, { useState } from 'react';
-import '../styles/Newsletter.css'; // Importa il tuo stile per il form
+import { Container, Form, Button } from 'react-bootstrap';
+import axios from 'axios';
 
-const NewsletterForm = () => {
+const Newsletter = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
-    // Aggiungi la logica per gestire l'iscrizione alla newsletter qui (e.g., chiamata API)
-    setMessage('Grazie per esserti iscritto!');
-    setEmail('');
+    try {
+      const response = await axios.post('http://localhost:5000/api/newsletter', { email });
+      setMessage(response.data.message);
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      setMessage('Errore durante l\'iscrizione alla newsletter. Riprova più tardi.');
+    }
   };
 
   return (
-    <div className="newsletter-form">
+    <Container className="mt-5 w-25 d-flex flex-column align-items-center bg-white rounded-4 p-4">
       <h2>Iscriviti alla nostra Newsletter</h2>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Inserisci la tua email"
-          required
-        />
-        <button type="submit">Iscriviti</button>
-      </form>
-      {message && <p>{message}</p>}
-    </div>
+      <Form className='d-flex flex-column m-auto' onSubmit={handleSubscribe}>
+        <Form.Group controlId="formEmail">
+          <Form.Control
+            type="email"
+            placeholder="Enter email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </Form.Group>
+        <Button variant="danger" type="submit" className="mt-3">
+          Iscriviti
+        </Button>
+      </Form>
+      {message && <p className="mt-3">{message}</p>}
+    </Container>
   );
 };
 
-export default NewsletterForm;
+export default Newsletter;
+

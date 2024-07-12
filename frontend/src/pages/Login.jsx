@@ -3,11 +3,11 @@ import React, { useState } from 'react';
 import { Container, Form, Button, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Login = ({setIsAuthenticated}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const navigate = useNavigate();
   const [error, setError] = useState('');
+  const navigate = useNavigate();
   const handleLogin = async (e) => {
     e.preventDefault();
     try { const response = await axios.post('http://localhost:5000/login', {
@@ -19,6 +19,7 @@ const Login = () => {
  
     if (data.token) {
       localStorage.setItem('token', data.token);
+      setIsAuthenticated(true);
       navigate('/admin/dashboard');
     } else {
       setError('Errore durante il login');
