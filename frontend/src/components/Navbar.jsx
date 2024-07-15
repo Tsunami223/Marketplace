@@ -15,6 +15,7 @@ const CustomNavbar = ({ isAuthenticated, onLogout }) => {
   const handleSearch = (e) => {
     e.preventDefault();
     navigate(`/search?query=${searchTerm}`);
+    setSearchTerm('');
   };
 
   return (

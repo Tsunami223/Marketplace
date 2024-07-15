@@ -15,6 +15,7 @@ const SearchResults = () => {
       try {
         const response = await axios.get(`http://localhost:5000/api/products?search=${query}`);
         setProducts(response.data);
+        
       } catch (error) {
         console.error('Error fetching filtered products:', error);
       }
@@ -29,7 +30,7 @@ const SearchResults = () => {
     <Container className="mt-5 bg-white w-50 rounded-4">
       <h2>Search Results for "{query}"</h2>
       <Row>
-        {products.map((product) => (
+        {products.filter(product => product.name.toLowerCase().includes(query.toLowerCase())).map((product) => (
         <Col key={product._id} sm={12} md={6} lg={4} xl={3}>
         <Card className="my-3 p-3 rounded">
           <Card.Img src={product.imageUrl} variant="top" />

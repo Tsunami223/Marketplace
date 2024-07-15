@@ -3,27 +3,65 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const User = require('./models/User');
-const auth = require('./middleware/auth'); // Middleware per l'autenticazione JWT
+const auth = require('./middleware/auth');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const multer = require('multer');
 const bodyParser = require('body-parser');
-
-
-dotenv.config();
+const {cloudinary} = require('./config/cloudinaryConfig');
+const Product = require('./models/Product');
 const app = express();
 const PORT = process.env.PORT || 5000;
-const upload = multer({ dest: 'uploads/' });
 const newsletterRoutes = require('./routes/newsletter');
-
 const productRoutes = require('./routes/products');
-const multerUploads = require('./config/cloudinaryConfig'); 
-const verifyToken = require('./middleware/auth');
+const fs = require('fs');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
+dotenv.config();
 
+
+// Middleware
 app.use(cors());
-app.use(bodyParser.json());
-app.use('/api/newsletter', newsletterRoutes);
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+// Routes
+app.use('/newsletter', newsletterRoutes);
+app.use('/api/products', productRoutes); 
+
+
+
+// Route per gestire l'upload di un nuovo prodotto con immagine su Cloudinary
+app.post('/api/products', upload.single('imageUrl'), async (req, res) => {
+  try {
+    // Gestione dell'upload dell'immagine
+    if (!req.file) {
+      return res.status(400).json({ error: 'Upload an image file' });
+    }
+    const result = await cloudinary.uploader.upload(req.file.path); // Percorso dell'immagine salvata
+
+    // Dati del prodotto dal corpo della richiesta e URL dell'immagine caricata
+    const { name, description, price, category } = req.body;
+    const imageUrl = result.secure_url;
+
+    // Creazione di un nuovo prodotto utilizzando il modello Product
+    const newProduct = new Product({ name, description, price, category, imageUrl });
+
+    // Salvataggio del prodotto nel database
+    await newProduct.save();
+    // Elimina il file caricato dall'upload per evitare problemi di memoria
+    fs.unlinkSync(req.file.path);
+
+
+    // Risposta con il nuovo prodotto creato
+    res.status(201).json(newProduct);
+  } catch (error) {
+    console.error('Error uploading image:', error);
+    res.status(500).json({ error: 'Errore durante l\'upload dell\'immagine' });
+  }
+});
+
+// Route per gestire il login degli utenti
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
@@ -61,6 +99,8 @@ app.post('/login', async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// Route per gestire la registrazione di nuovi utenti
 app.post('/register', async (req, res) => {
   const { username, email, password } = req.body;
 
@@ -85,38 +125,20 @@ app.post('/register', async (req, res) => {
     // Salva l'utente nel database
     await user.save();
     res.status(201).json({ msg: 'User created' });
-
-    
-
- 
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
   }
 });
 
-
-app.use('/api/products', productRoutes);
-app.post('/api/products', upload.single('imageUrl'), async (req, res) => {
-  try {
-    const { name, description, category, price } = req.body;
-    const imageUrl = req.file.path;
-    console.log(imageUrl);
-    const newProduct = { name, description, category, price, imageUrl };
-    res.status(201).json(newProduct);
-  } catch (error) {
-    res.status(500).json({ error: 'Errore durante la creazione del prodotto.' });
-  }
-});
-
+// Connessione al database MongoDB
 mongoose.connect(process.env.MONGO_URI);
-
 
 const db = mongoose.connection;
 db.on('error', console.error.bind(console, 'Connection error:'));
 db.once('open', () => console.log('Connected to MongoDB'));
 
-
+// Middleware per autenticazione JWT e restituzione dell'utente autenticato
 app.get('/auth/user', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id).select('-password');
@@ -127,4 +149,5 @@ app.get('/auth/user', auth, async (req, res) => {
   }
 });
 
+// Avvio del server Express
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

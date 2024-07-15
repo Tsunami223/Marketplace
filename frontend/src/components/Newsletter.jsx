@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
 
+
 const Newsletter = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
@@ -9,7 +10,7 @@ const Newsletter = () => {
   const handleSubscribe = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:5000/api/newsletter', { email });
+      const response = await axios.post('http://localhost:5000/newsletter', { email });
       setMessage(response.data.message);
     } catch (error) {
       console.error('Error subscribing to newsletter:', error);

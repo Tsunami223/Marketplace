@@ -3,19 +3,18 @@ import { Container, Table, Button, Modal, Form } from 'react-bootstrap';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [category, setCategory] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     price: '',
     category: '',
     imageUrl: '',
-
   });
 
   useEffect(() => {
@@ -25,7 +24,7 @@ const AdminDashboard = () => {
       fetchProducts();
     }
   }, [token, navigate]);
-  
+
   const fetchProducts = async () => {
     try {
       const response = await axios.get('http://localhost:5000/api/products', {
@@ -41,11 +40,19 @@ const AdminDashboard = () => {
 
   const handleAddProduct = async () => {
     try {
-      await axios.post('http://localhost:5000/api/products', formData, {
+      const formDataWithImage = new FormData();
+      formDataWithImage.append('name', formData.name);
+      formDataWithImage.append('description', formData.description);
+      formDataWithImage.append('price', formData.price);
+      formDataWithImage.append('category', formData.category);
+      formDataWithImage.append('imageUrl', formData.imageUrl);
+
+      await axios.post('http://localhost:5000/api/products', formDataWithImage, {
         headers: {
           "Authorization": `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
         },
-      }); 
+      });
       fetchProducts();
       setShowModal(false);
     } catch (error) {
@@ -54,7 +61,7 @@ const AdminDashboard = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    const userConfirmed = window.confirm("Sei sicuro di voler eliminare questo prodotto?");
+    const userConfirmed = window.confirm("Are you sure you want to delete this product?");
 
     if (userConfirmed) {
       try {
@@ -70,12 +77,33 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleUpdateProduct = async (productId) => {
+    try {
+      await axios.put(`http://localhost:5000/api/products/${productId}`, formData, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      fetchProducts();
+      setShowModal(false);
+    } catch (error) {
+      console.error('Error updating product:', error);
+    }
+  };
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const { name, value, files } = e.target;
+    if (name === 'imageUrl') {
+      setFormData({
+        ...formData,
+        [name]: files[0], 
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [name]: value,
+      });
+    }
   };
 
   const toggleModal = () => setShowModal(!showModal);
@@ -124,14 +152,20 @@ const AdminDashboard = () => {
                 onChange={handleChange}
               />
             </Form.Group>
-            <Form.Group controlId="formPrice">
+
+            <Form.Group controlId="formCategory">
               <Form.Label>Category</Form.Label>
               <Form.Control
-                type="text"
+                as="select"
                 name="category"
-                value={formData.category}
-                onChange={handleChange}
-              />
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                  required>
+                <option value="">Select a category</option>
+                <option value="shoes">Shoes</option>
+                <option value="clothes">Clothes</option>
+                <option value="accessories">Accessories</option>
+              </Form.Control>
             </Form.Group>
 
             <Form.Group controlId="formImageUrl">
@@ -141,7 +175,6 @@ const AdminDashboard = () => {
                 name="imageUrl"
                 onChange={handleChange}
               />
-
             </Form.Group>
           </Form>
         </Modal.Body>
@@ -154,7 +187,7 @@ const AdminDashboard = () => {
           </Button>
         </Modal.Footer>
       </Modal>
-       
+
       <Table striped bordered hover>
         <thead>
           <tr>
@@ -171,15 +204,15 @@ const AdminDashboard = () => {
               <td>{product.name}</td>
               <td>{product.description}</td>
               <td>{product.price}</td>
-              <td>{product.category}</td>
+              <td>{product.category && category.find(cat => cat._id === product.category)?.name}</td>
               <td>
                 <Button className='m-1' variant="danger" onClick={() => handleDeleteProduct(product._id)}>
                   Delete
                 </Button>
-                <Button className='m-1' variant="primary" onClick={() => handleChange(product._id)}>
+                <Button className='m-1' variant="primary" onClick={() => handleUpdateProduct(product._id)}>
                   Edit
-                </Button>             
-                 </td>
+                </Button>
+              </td>
             </tr>
           ))}
         </tbody>
