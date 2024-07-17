@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Container, Form, Button } from 'react-bootstrap';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -16,6 +18,7 @@ const RegistrationForm = () => {
       [name]: value,
     });
   };
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,6 +31,8 @@ const RegistrationForm = () => {
         email: '',
         password: '',
       });
+
+      navigate('/login');
 
     } catch (error) {
       console.error('Registration Error:', error);
