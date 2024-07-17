@@ -50,7 +50,7 @@ const CustomNavbar = ({ isAuthenticated, onLogout }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
           <Button type="submit" variant="outline-light">🔍</Button>
-          <Link to="/cart" className="btn btn-light align-content-center">Carrello</Link>
+         {isAuthenticated && <Link to="/cart" className="btn btn-light align-content-center">Carrello</Link>}
           {isAuthenticated ? (
             <Button variant="danger" onClick={handleLogoutClick}>Logout</Button>
           ) : (
