@@ -29,29 +29,3 @@ Tecnologie Utilizzate
         MongoDB 🍃
         Nodemailer 📧
 
-
-
-Come Iniziare
-
-Per iniziare con il nostro sito:
-
-    Assicurati di avere Node.js installato sul tuo computer.
-    Clona il repository da GitHub.
-
-    bash
-
-git clone https://github.com/tuonome/sito-fantastico.git
-
-Installa le dipendenze.
-
-bash
-
-cd sito-fantastico
-npm install
-
-Avvia il server locale.
-
-
-npm start
-
-Visita http://localhost:3000 nel tuo browser per esplorare il sito!
