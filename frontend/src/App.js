@@ -32,6 +32,7 @@ const App = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
   };
+  
   return (
     <BrowserRouter>
       <CartProvider>

@@ -8,7 +8,8 @@ const AdminDashboard = () => {
   const token = localStorage.getItem('token');
   const [products, setProducts] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [category, setCategory] = useState([]);
+  const [isEditMode, setIsEditMode] = useState(false); // Flag per distinguere tra modalità aggiunta e modifica
+  const [currentProductId, setCurrentProductId] = useState(null); // ID del prodotto selezionato per la modifica
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -38,30 +39,51 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAddProduct = async () => {
+  const handleAddOrUpdateProduct = async () => {
     try {
       const formDataWithImage = new FormData();
       formDataWithImage.append('name', formData.name);
       formDataWithImage.append('description', formData.description);
       formDataWithImage.append('price', formData.price);
       formDataWithImage.append('category', formData.category);
-      formDataWithImage.append('imageUrl', formData.imageUrl);
+      if (formData.imageUrl) {
+        formDataWithImage.append('imageUrl', formData.imageUrl);
+      }
 
-      await axios.post('http://localhost:5000/api/products', formDataWithImage, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      if (isEditMode && currentProductId) {
+        await axios.put(`http://localhost:5000/api/products/${currentProductId}`, formDataWithImage, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      } else {
+        await axios.post('http://localhost:5000/api/products', formDataWithImage, {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
+
       fetchProducts();
       setShowModal(false);
+      setIsEditMode(false);
+      setCurrentProductId(null);
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        category: '',
+        imageUrl: '',
+      });
     } catch (error) {
-      console.error('Error adding product:', error);
+      console.error('Error adding or updating product:', error);
     }
   };
 
   const handleDeleteProduct = async (productId) => {
-    const userConfirmed = window.confirm("Are you sure you want to delete this product?");
+    const userConfirmed = window.confirm("Sei sicuro di voler rimuovere questo prodotto?");
 
     if (userConfirmed) {
       try {
@@ -77,18 +99,17 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleUpdateProduct = async (productId) => {
-    try {
-      await axios.put(`http://localhost:5000/api/products/${productId}`, formData, {
-        headers: {
-          "Authorization": `Bearer ${token}`,
-        },
-      });
-      fetchProducts();
-      setShowModal(false);
-    } catch (error) {
-      console.error('Error updating product:', error);
-    }
+  const handleEditProduct = (product) => {
+    setIsEditMode(true);
+    setCurrentProductId(product._id);
+    setFormData({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category,
+      imageUrl: '', 
+    });
+    setShowModal(true);
   };
 
   const handleChange = (e) => {
@@ -106,7 +127,18 @@ const AdminDashboard = () => {
     }
   };
 
-  const toggleModal = () => setShowModal(!showModal);
+  const toggleModal = () => {
+    setShowModal(!showModal);
+    setIsEditMode(false);
+    setCurrentProductId(null);
+    setFormData({
+      name: '',
+      description: '',
+      price: '',
+      category: '',
+      imageUrl: '',
+    });
+  };
 
   return (
     <Container className="mt-5 bg-white rounded-4 p-4 mb-2">
@@ -118,7 +150,7 @@ const AdminDashboard = () => {
 
       <Modal show={showModal} onHide={toggleModal}>
         <Modal.Header closeButton>
-          <Modal.Title>Add New Product</Modal.Title>
+          <Modal.Title>{isEditMode ? 'Edit Product' : 'Add New Product'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -158,13 +190,13 @@ const AdminDashboard = () => {
               <Form.Control
                 as="select"
                 name="category"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                  required>
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                required>
                 <option value="">Select a category</option>
-                <option value="shoes">Shoes</option>
-                <option value="clothes">Clothes</option>
-                <option value="accessories">Accessories</option>
+                <option value="Scarpe">Scarpe</option>
+                <option value="Abbigliamento">Abbigliamento</option>
+                <option value="Accessori">Accessori</option>
               </Form.Control>
             </Form.Group>
 
@@ -182,8 +214,8 @@ const AdminDashboard = () => {
           <Button variant="secondary" onClick={toggleModal}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleAddProduct}>
-            Save Product
+          <Button variant="primary" onClick={handleAddOrUpdateProduct}>
+            {isEditMode ? 'Update Product' : 'Save Product'}
           </Button>
         </Modal.Footer>
       </Modal>
@@ -204,12 +236,12 @@ const AdminDashboard = () => {
               <td>{product.name}</td>
               <td>{product.description}</td>
               <td>{product.price}</td>
-              <td>{product.category && category.find(cat => cat._id === product.category)?.name}</td>
+              <td>{product.category}</td>
               <td>
                 <Button className='m-1' variant="danger" onClick={() => handleDeleteProduct(product._id)}>
                   Delete
                 </Button>
-                <Button className='m-1' variant="primary" onClick={() => handleUpdateProduct(product._id)}>
+                <Button className='m-1' variant="primary" onClick={() => handleEditProduct(product)}>
                   Edit
                 </Button>
               </td>

@@ -1,16 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
 
 body {
   margin: 0;
-  font-family: 'Oswald', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   background-image: url(./assets/sfondo.png);
   background-repeat: no-repeat;
   background-size: cover;
   background-attachment: fixed;
   background-position: center;
   min-height: 100vh;
+  
 
 }
 .page-enter {

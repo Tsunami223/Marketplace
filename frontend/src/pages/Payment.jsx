@@ -23,7 +23,7 @@ const Payment = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Qui puoi gestire la logica del pagamento, ad esempio inviare i dati ad un server
+    // Qui si può gestire la logica del pagamento, ad esempio inviare i dati ad un server
     alert('Pagamento completato con successo');
   };
 

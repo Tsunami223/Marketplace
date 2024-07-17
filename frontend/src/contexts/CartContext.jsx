@@ -1,31 +1,63 @@
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
+  const initialCart = JSON.parse(localStorage.getItem('cart')) || [];
+  const [cart, setCart] = useState(initialCart);
+  const navigate = useNavigate();
 
-    const addToCart = (item) => {
-        setCart((prevCart) => {
-            const existingProduct = prevCart.find(item => item.id === item.id);
-            if (existingProduct) {
-              return prevCart.map(item =>
-                item.id === item.id ? { ...item, quantity: item.quantity + 1 } : item
-              );
-            } else {
-              return [...prevCart, { ...item, quantity: 1 }];
-            }
-          });
-          alert(`${item.name} è stato aggiunto al carrello!`);
-        };
-        const removeFromCart = (productId) => {
-          setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
-        };
-      
 
-    return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart }}>
-            {children}
-        </CartContext.Provider>
-    );
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart')) || [];
+    setCart(savedCart);
+  }, []);
+
+  const saveCartToLocalStorage = (updatedCart) => {
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+  const emptyCart = () => {
+    setCart([]);
+  };
+
+  const addToCart = (item) => {
+    setCart((prevCart) => {
+      const existingProductIndex = prevCart.findIndex(
+        (cartItem) => cartItem.id === item.id && cartItem === item.size
+      );
+
+      if (existingProductIndex !== -1) {
+        const updatedCart = [...prevCart];
+        updatedCart[existingProductIndex].quantity += item.quantity;
+        return updatedCart;
+      } else {
+        const updatedCart = [...prevCart, { ...item, quantity: item.quantity }];
+        saveCartToLocalStorage(updatedCart);
+        return updatedCart;      }
+    });
+
+    alert(`${item.name} taglia ${item.size} è stato aggiunto al carrello!`);
+    navigate('/shop');
+  };
+
+  const removeFromCart = (productId) => {
+    const newCart = cart.filter(item => item._id !== productId);
+    setCart(newCart);
+    console.log("eliminato" + productId);
+  };
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem('cart');
+  };
+
+  useEffect(() => {
+    saveCartToLocalStorage(cart);
+  }, [cart]);
+
+  return (
+    <CartContext.Provider value={{ cart, addToCart, removeFromCart, emptyCart }}>
+      {children}
+    </CartContext.Provider>
+  );
 };

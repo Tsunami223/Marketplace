@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Routes
-app.use('/newsletter', newsletterRoutes);
+app.use('/api', newsletterRoutes);
 app.use('/api/products', productRoutes); 
 
 

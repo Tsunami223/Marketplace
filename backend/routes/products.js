@@ -2,8 +2,7 @@ const express = require('express');
 const Product = require('../models/Product');
 const router = express.Router();
 const verifyToken = require('../middleware/auth');
-const { upload, cloudinary } = require('../config/cloudinaryConfig'); // Importa cloudinary da cloudinaryConfig.js
-
+const { upload, cloudinary } = require('../config/cloudinaryConfig');
 
 
 // Ottieni tutti i prodotti
@@ -42,11 +41,19 @@ router.post('/api/products', verifyToken, upload.single('prodotti'), async (req,
 });
 
 // Aggiorna un prodotto esistente
-router.put('/:id', verifyToken, async (req, res) => {
-  const { name, description, category, price, imageUrl } = req.body;
+router.put('/:id', verifyToken, upload.single('imageUrl'), async (req, res) => {
+  const { name, description, category, price } = req.body;
+  const productId = req.params.id;
+
   try {
+    let imageUrl;
+
+    if (req.file) {
+      const result = await cloudinary.uploader.upload(req.file.path);
+      imageUrl = result.secure_url;
+    }
     const updatedProduct = await Product.findByIdAndUpdate(
-      req.params.id,
+      productId,
       { name, description, category, price, imageUrl },
       { new: true }
     );
@@ -74,7 +81,7 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 });
 
-// Ottieni un prodotto esistente
+// Ottiene un prodotto esistente
 router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);

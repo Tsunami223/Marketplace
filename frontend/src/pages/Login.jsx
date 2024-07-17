@@ -20,7 +20,7 @@ const Login = ({setIsAuthenticated}) => {
     if (data.token) {
       localStorage.setItem('token', data.token);
       setIsAuthenticated(true);
-      navigate('/admin/dashboard');
+      navigate('/');
     } else {
       setError('Errore durante il login');
     }

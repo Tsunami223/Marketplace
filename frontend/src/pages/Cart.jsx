@@ -3,20 +3,30 @@ import { Container, Table, Button } from 'react-bootstrap';
 import { CartContext } from '../contexts/CartContext';
 import { useNavigate } from 'react-router-dom';
 
-
-
-
 const Cart = () => {
-  const { cart, removeFromCart } = useContext(CartContext);
+  const { cart, removeFromCart, emptyCart } = useContext(CartContext);
   const navigate = useNavigate();
+
   const handleRemove = (productId) => {
     const confirmed = window.confirm('Sei sicuro di voler rimuovere questo articolo dal carrello?');
     if (confirmed) {
       removeFromCart(productId);
     }
   };
+
   const handleCheckout = () => {
     navigate('/shipping');
+  };
+
+  const handleEmptyCart = () => {
+    const confirmed = window.confirm('Sei sicuro di voler svuotare il carrello?');
+    if (confirmed) {
+      emptyCart();
+    }
+  };
+
+  const calculateTotal = () => {
+    return cart.reduce((total, product) => total + product.price * product.quantity, 0);
   };
 
   return (
@@ -26,30 +36,44 @@ const Cart = () => {
         <p>Il carrello è vuoto</p>
       ) : (
         <>
-        <Table striped bordered hover>
-          <thead>
-            <tr>
-              <th>Quantità</th>
-              <th>Nome</th>
-              <th>Prezzo</th>
-              <th>Azioni</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cart.map((product, index) => (
-              <tr key={index}>
-                <td>{index + 1}</td>
-                <td>{product.name}</td>
-                <td>{product.price} €</td>
-                <td>
-                  <Button variant="danger" onClick={() => handleRemove(product.id)}>Rimuovi</Button>
-                </td>
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Quantità</th>
+                <th>Taglia</th>
+                <th>Prezzo</th>
+                <th>Azioni</th>
               </tr>
-            ))}
-          </tbody>
-        </Table>
-                  <Button variant="primary" onClick={handleCheckout} className="mt-3">Checkout</Button>
-                  </>
+            </thead>
+            <tbody>
+              {cart.map((product) => (
+                <tr key={`${product.id}-${product.size}`}>
+                  <td>{product.name}</td>
+                  <td>{product.quantity}</td>
+                  <td>{product.size}</td>
+                  <td>{product.price} €</td>
+                  <td>
+                    <Button variant="danger" onClick={() => handleRemove(product._id)}>
+                      Rimuovi
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan="3"></td>
+                <td><strong>Totale:</strong></td>
+                <td><strong>{calculateTotal()} €</strong></td>
+              </tr>
+            </tbody>
+          </Table>
+          <Button variant="danger" onClick={handleCheckout} className="mt-3">
+            Checkout
+          </Button>
+          <Button variant="primary" onClick={handleEmptyCart} className="mt-3 ms-3">
+            Svuota Carrello
+          </Button>
+        </>
       )}
     </Container>
   );

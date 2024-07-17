@@ -1,15 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Navbar, Nav, Form, FormControl, Button } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
+import { CartContext } from '../contexts/CartContext';
 import '../styles/Navbar.css';
 
 const CustomNavbar = ({ isAuthenticated, onLogout }) => {
+  const { clearCart } = useContext(CartContext);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleLogoutClick = () => {
     onLogout();
-    navigate('/'); // Naviga alla home page
+    navigate('/'); 
+    clearCart();
   };
 
   const handleSearch = (e) => {

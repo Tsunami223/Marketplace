@@ -9,6 +9,7 @@ const Product = () => {
       id: product._id,
       name: product.name,
       price: product.price,
+      
     };
     setCartItems(prevItems => [...prevItems, cartItem]);
 

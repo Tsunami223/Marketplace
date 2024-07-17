@@ -15,7 +15,7 @@ const verifyToken= async (req, res, next) => {
     // Verifica il token
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
 
-    // Aggiungi l'utente dal token decodificato all'oggetto della richiesta
+    // Aggiunge l'utente dal token decodificato all'oggetto della richiesta
     req.user = decoded.user;
     next();
   } catch (err) {
